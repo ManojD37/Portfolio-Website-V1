@@ -360,10 +360,10 @@ export default function Home() {
               </h2>
               <div className="about-body text-text-custom2 text-[15px] leading-relaxed flex flex-col gap-5">
                 <p>
-                  AI Engineer at Infinite Computer Solutions, working on enterprise healthcare AI and automation systems. My exposure to OCR pipelines, LLM workflows, and HIPAA-compliant production deployments shaped how I think about building real-world AI.
+                  As an Associate Software Engineer at Infinite Computer Solutions, I build production-level healthcare automation systems. My exposure to OCR extraction engines, LLM-powered classification workflows, and HIPAA-secure data pipelines has shaped how I design resilient, observable, and compliant AI architectures at scale.
                 </p>
                 <p>
-                  I'm drawn to the intersection of orchestration, developer cognition, and infrastructure-level thinking — the unsexy layer where real complexity lives and where meaningful impact happens.
+                  I focus on the intersection of LLM orchestration, developer cognitive tooling, and backend infrastructure. Whether building code visualization graphs like Sentieal, real-time multiplayer geo-chess platforms like En Passant, or setting up secure Docker container workflows, my goal is to design systems that reduce complexity and run with high reliability.
                 </p>
                 <p>
                   Long-term goal: build AI systems and startup ecosystems that help builders, engineers, and founders move faster.
