@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import { motion, useScroll, useSpring } from "framer-motion";
-import { ArrowDown, ArrowUpRight, CheckCircle2, ChevronRight, Menu, X } from "lucide-react";
+import { ArrowUpRight, Menu, X } from "lucide-react";
 import LenisProvider from "@/components/LenisProvider";
 import HeroCanvas from "@/components/HeroCanvas";
 import { skillList } from "@/components/SkillIcons";
@@ -10,34 +11,38 @@ import SkillCard from "@/components/SkillCard";
 import ProjectCard, { ProjectData } from "@/components/ProjectCard";
 import PreviewModal from "@/components/PreviewModal";
 
+// Cursor and RoleCycler are client-only — dynamic import with ssr:false avoids any hydration tree mismatch
+const CustomCursor = dynamic(() => import("@/components/CustomCursor"), { ssr: false });
+const RoleCycler = dynamic(() => import("@/components/RoleCycler"), { ssr: false });
+
 const projects: ProjectData[] = [
   {
     num: "01",
-    title: "Sentieal — Developer Intelligence Platform",
-    desc: "AI-powered code visualization tool that helps developers understand architecture, trace failures, detect affected modules, and calculate the blast radius of pull requests. Born from the real frustration of losing mental context in large codebases.",
+    title: "Sentinel — Developer Infrastructure Platform",
+    desc: "A developer infrastructure SaaS designed to improve codebase comprehension. It maps architectures, visualizes dependencies, and calculates the blast radius of code changes to help developers navigate complex systems.",
     tags: ["Next.js", "FastAPI", "Supabase", "AI Orchestration"],
-    outcome: "Turns codebase archaeology from hours into seconds",
+    outcome: "Improves developer cognition and codebase visibility",
     link: "https://sentinel-teal-two.vercel.app/",
-    type: "Dev Intelligence",
+    type: "Dev Infrastructure",
     isFeatured: true,
     canvasId: "pc1",
   },
   {
     num: "02",
-    title: "Zen AI — Healthcare Automation System",
-    desc: "Production AI system automating healthcare referral document processing. Handles OCR extraction, PHI classification, HIPAA-compliant storage — reducing manual review workflows significantly at enterprise scale.",
+    title: "Zen AI — Healthcare Automation Platform",
+    desc: "An enterprise healthcare automation platform designed to process referral documents using OCR and large language models. Built for high reliability, scalability, and secure, HIPAA-compliant data handling.",
     tags: ["GPT-4o", "Tesseract OCR", "FastAPI", "Azure"],
-    outcome: "Eliminated hours of manual document review per day at enterprise scale",
+    outcome: "Processes complex medical referral documents with LLM and OCR pipelines",
     link: "https://zenai-fax-referral-extractor.onrender.com/",
     type: "Healthcare AI",
     canvasId: "pc2",
   },
   {
     num: "03",
-    title: "Your Rights — Civic Infrastructure Platform",
-    desc: "A civic escalation platform bridging citizens and authorities — combining the openness of social platforms with anonymity for safe grievance reporting and intelligent issue escalation.",
+    title: "YourRIGHT/Urimai — Civic Escalation Platform",
+    desc: "A civic responsibility and escalation platform designed to improve transparent communication between citizens and authorities through secure grievance reporting and escalation workflows.",
     tags: ["Coordination Systems", "Public Infrastructure", "Civic Tech"],
-    outcome: "Safe, anonymous escalation from citizen to authority — no friction",
+    outcome: "Bridge communication and streamline civic issue escalation",
     link: "https://your-rights.vercel.app/",
     type: "Civic Infrastructure",
     canvasId: "pc3",
@@ -45,10 +50,10 @@ const projects: ProjectData[] = [
   {
     num: "04",
     title: "En Passant — Territory Chess Ecosystem",
-    desc: "Chess meets geolocation. A territory domination ecosystem where players compete to own regions, climb rankings, and engage in real-time strategic battles — Pokémon Go mechanics applied to competitive chess.",
+    desc: "A territory-based chess ecosystem combining competitive chess strategy, geolocation, real-time multiplayer interactions, and persistent world mechanics.",
     tags: ["Game Systems", "Geolocation", "Multiplayer", "Real-time"],
-    outcome: "Real-world territory battles powered by chess strategy",
-    link: "https://github.com/ManojD37", // Default to GitHub profile as no site URL is present
+    outcome: "Competitive chess strategy mapped to real-world geolocation",
+    link: "https://github.com/ManojDevarajulu",
     type: "Game Ecosystem",
     canvasId: "pc4",
   },
@@ -67,13 +72,6 @@ export default function Home() {
   const [previewUrl, setPreviewUrl] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
 
-  // Custom Cursor refs to bypass React state re-renders (runs at 120fps GPU-accelerated)
-  const cursorRef = useRef<HTMLDivElement>(null);
-  const cursorRingRef = useRef<HTMLDivElement>(null);
-  const mousePosRef = useRef({ x: -100, y: -100 });
-  const ringPosRef = useRef({ x: -100, y: -100 });
-  const [isHovered, setIsHovered] = useState(false);
-
   // Page Scroll Progress
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
@@ -82,11 +80,7 @@ export default function Home() {
   useEffect(() => {
     setMounted(true);
     const timer = setTimeout(() => setLoading(false), 800);
-
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
-    };
-
+    const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => {
       clearTimeout(timer);
@@ -94,74 +88,24 @@ export default function Home() {
     };
   }, []);
 
-  // Handle custom cursor tracking (direct DOM update, no React re-render)
-  useEffect(() => {
-    if (!mounted) return;
-    const updateMousePos = (e: MouseEvent) => {
-      mousePosRef.current = { x: e.clientX, y: e.clientY };
-      if (cursorRef.current) {
-        cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
-      }
-    };
-
-    window.addEventListener("mousemove", updateMousePos);
-    return () => window.removeEventListener("mousemove", updateMousePos);
-  }, [mounted]);
-
-  // Interpolate cursor ring with snappy inertia (direct DOM update, no React re-render)
-  useEffect(() => {
-    if (!mounted) return;
-    let active = true;
-    const anim = () => {
-      if (!active) return;
-      const rx = ringPosRef.current.x + (mousePosRef.current.x - ringPosRef.current.x) * 0.18;
-      const ry = ringPosRef.current.y + (mousePosRef.current.y - ringPosRef.current.y) * 0.18;
-      ringPosRef.current = { x: rx, y: ry };
-      if (cursorRingRef.current) {
-        cursorRingRef.current.style.transform = `translate3d(${rx}px, ${ry}px, 0) translate(-50%, -50%)`;
-      }
-      requestAnimationFrame(anim);
-    };
-    requestAnimationFrame(anim);
-    return () => {
-      active = false;
-    };
-  }, [mounted]);
-
-  // Hook cursor hover classes
-  useEffect(() => {
-    if (!mounted || loading) return;
-    const handleMouseEnter = () => setIsHovered(true);
-    const handleMouseLeave = () => setIsHovered(false);
-
-    const elements = document.querySelectorAll("a, button, [role='button'], .project-card");
-    elements.forEach((el) => {
-      el.addEventListener("mouseenter", handleMouseEnter);
-      el.addEventListener("mouseleave", handleMouseLeave);
-    });
-
-    return () => {
-      elements.forEach((el) => {
-        el.removeEventListener("mouseenter", handleMouseEnter);
-        el.removeEventListener("mouseleave", handleMouseLeave);
-      });
-    };
-  }, [mounted, loading, previewOpen]);
-
   const triggerPreview = (url: string, title: string) => {
     setPreviewUrl(url);
     setPreviewTitle(title);
     setPreviewOpen(true);
   };
 
-  if (!mounted) return null;
+
+  // NOTE: We do NOT return null before mounted.
+  // Returning null on the server causes a hydration mismatch (server: full HTML, client: null → boom).
+  // Instead we render the full structure and gate only client-only elements (cursor) inside JSX.
 
   return (
     <LenisProvider>
       {/* ── Page Loader ── */}
       <div
-        className={`page-loader fixed inset-0 z-[10000] bg-bg flex items-center justify-center transition-all duration-700 ease-in-out ${!loading ? "opacity-0 invisible pointer-events-none" : ""
-          }`}
+        className={`page-loader fixed inset-0 z-[10000] bg-bg flex items-center justify-center transition-all duration-700 ease-in-out ${
+          !loading ? "opacity-0 invisible pointer-events-none" : ""
+        }`}
       >
         <span className="font-mono text-[11px] text-text-custom3 tracking-[0.3em] uppercase animate-loader-pulse">
           Loading Portfolio…
@@ -174,22 +118,8 @@ export default function Home() {
         style={{ scaleX }}
       />
 
-      {/* ── Custom Cursor (Desktop only) ── */}
-      <div className="hidden lg:block">
-        <div
-          ref={cursorRef}
-          className="cursor fixed w-2.5 h-2.5 bg-text-custom rounded-full pointer-events-none z-[9999]"
-          style={{ left: 0, top: 0, transform: "translate3d(-100px, -100px, 0) translate(-50%, -50%)" }}
-        />
-        <div
-          ref={cursorRingRef}
-          className={`cursor-ring fixed rounded-full pointer-events-none z-[9998] transition-all duration-300 ease-out border ${isHovered
-              ? "w-14 h-14 border-mono/65 bg-mono/5 scale-110"
-              : "w-8 h-8 border-text-custom/25 bg-transparent"
-            }`}
-          style={{ left: 0, top: 0, transform: "translate3d(-100px, -100px, 0) translate(-50%, -50%)" }}
-        />
-      </div>
+      {/* ── Custom Cursor — loaded client-only via dynamic import, no SSR tree diff ── */}
+      <CustomCursor />
 
       {/* ── Header / Navigation ── */}
       <nav
@@ -198,12 +128,18 @@ export default function Home() {
             : "border-transparent bg-transparent"
           }`}
       >
-        <a href="#home" className="nav-logo font-mono text-[13px] text-text-custom2 hover:text-text-custom tracking-wider font-light transition-colors duration-200">
-          MD_
-        </a>
+        <div className="flex items-center gap-3">
+          <a href="#home" className="nav-logo font-mono text-[13px] text-text-custom2 hover:text-text-custom tracking-wider font-light transition-colors duration-200">
+            MD_
+          </a>
+          <div className="flex items-center gap-2 border border-mono/20 px-2.5 py-0.5 rounded-full bg-mono/5 select-none">
+            <div className="ticker-dot w-1.5 h-1.5 bg-mono rounded-full animate-ping" />
+            <span className="font-mono text-[8px] text-mono uppercase tracking-widest font-normal">Open to Work</span>
+          </div>
+        </div>
 
         {/* Desktop Links */}
-        <ul className="hidden md:flex gap-10 list-none">
+        <ul className="hidden md:flex gap-10 list-none items-center">
           {["work", "about", "experience", "stack", "contact"].map((section) => (
             <li key={section}>
               <a
@@ -214,6 +150,16 @@ export default function Home() {
               </a>
             </li>
           ))}
+          <li>
+            <a
+              href="/resume.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-mono text-[11px] text-mono border border-mono/30 px-3 py-1.5 hover:bg-mono hover:text-bg transition-all duration-300 uppercase tracking-wider"
+            >
+              Resume
+            </a>
+          </li>
         </ul>
 
         {/* Mobile Hamburger Button */}
@@ -241,6 +187,15 @@ export default function Home() {
             {section}
           </a>
         ))}
+        <a
+          href="/resume.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={() => setMenuOpen(false)}
+          className="text-xl font-mono text-mono border border-mono/30 px-6 py-2 hover:bg-mono hover:text-bg transition-all duration-300 uppercase tracking-wider mt-4"
+        >
+          Resume
+        </a>
       </div>
 
       <main className="relative z-10 flex-grow">
@@ -261,36 +216,69 @@ export default function Home() {
             className="hero-bg-text absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-medium text-transparent whitespace-nowrap pointer-events-none select-none tracking-tight z-1"
             style={{
               fontSize: "clamp(80px, 16vw, 240px)",
-              WebkitTextStroke: "1px rgba(232, 230, 224, 0.16)",
-              color: "rgba(232, 230, 224, 0.02)",
-              textShadow: "0 0 80px rgba(107,143,113,0.12), 0 0 160px rgba(107,143,113,0.06)",
+              WebkitTextStroke: "1px rgba(232, 230, 224, 0.08)",
+              color: "rgba(232, 230, 224, 0.01)",
+              textShadow: "0 0 80px rgba(107,143,113,0.08), 0 0 160px rgba(107,143,113,0.03)",
             }}
           >
             MANOJ
           </div>
 
           {/* Column structure with layout adjustments to avoid sitting too high */}
-          <div className="max-w-4xl relative z-10 flex flex-col gap-6 md:gap-8 mt-12 md:mt-16">
+          <div className="max-w-4xl relative z-10 flex flex-col gap-4 md:gap-5 mt-12 md:mt-16">
+            {/* Bold identity name — visual anchor of the hero */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.3 }}
+              className="hero-name select-none leading-none tracking-[-0.02em]"
+            >
+              <span
+                style={{
+                  fontSize: "clamp(52px, 9vw, 130px)",
+                  fontWeight: 800,
+                  color: "#e8e6e0",
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1,
+                  display: "block",
+                }}
+              >
+                MANOJ
+              </span>
+              <span
+                style={{
+                  fontSize: "clamp(52px, 9vw, 130px)",
+                  fontWeight: 800,
+                  letterSpacing: "-0.02em",
+                  lineHeight: 1,
+                  display: "block",
+                  WebkitTextStroke: "1.5px #6b8f71",
+                  color: "transparent",
+                }}
+              >
+                DEVARAJULU
+              </span>
+            </motion.div>
+
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="hero-eyebrow font-mono text-[11px] text-mono tracking-[0.18em] uppercase"
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="hero-eyebrow font-mono text-[11px] text-mono tracking-[0.18em] uppercase flex items-center gap-1.5 flex-wrap"
             >
-              AI Engineer & Systems Builder — Chennai, India
+              <RoleCycler /> <span className="text-text-custom3">— Chennai, India</span>
             </motion.div>
 
-            <motion.h1
+            <motion.h2
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.7 }}
-              className="hero-headline text-5xl md:text-7xl lg:text-8xl font-light leading-[1.05] tracking-tight text-text-custom"
+              transition={{ duration: 0.7, delay: 0.8 }}
+              className="hero-headline text-3xl md:text-5xl lg:text-6xl font-light leading-[1.1] tracking-tight text-text-custom2"
             >
               Building
-              <br />
-              <em className="font-serif italic font-normal text-text-custom2 block md:inline md:mr-4">intelligent</em>
-              systems.
-            </motion.h1>
+              {" "}<em className="font-serif italic font-normal text-text-custom">intelligent</em>
+              {" "}systems.
+            </motion.h2>
 
             <motion.p
               initial={{ opacity: 0, y: 15 }}
@@ -298,7 +286,7 @@ export default function Home() {
               transition={{ duration: 0.6, delay: 0.9 }}
               className="hero-sub text-[15px] text-text-custom2 leading-relaxed max-w-[520px]"
             >
-              I engineer AI infrastructure, developer tools, and intelligent workflows. Systems-first thinker. Open for Job.
+              I engineer AI infrastructure, developer tools, and intelligent workflows. Systems-first thinker. Open to Work.
             </motion.p>
 
             <motion.div
@@ -311,6 +299,14 @@ export default function Home() {
                 View Work
               </a>
               <a
+                href="/resume.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-[12px] text-mono border border-mono/30 px-5 py-3 hover:bg-mono hover:text-bg transition-all duration-300 uppercase tracking-wider flex items-center gap-1.5"
+              >
+                Resume <span>↓</span>
+              </a>
+              <a
                 href="#contact"
                 className="btn-ghost font-mono text-[13px] text-text-custom2 hover:text-text-custom tracking-wide flex items-center gap-2 group/btn transition-colors duration-200"
               >
@@ -318,14 +314,18 @@ export default function Home() {
                 <span className="text-lg transition-transform duration-200 group-hover/btn:translate-x-1">→</span>
               </a>
             </motion.div>
-          </div>
 
-          {/* Availability and Scroll Tickers */}
-          <div className="absolute bottom-16 left-8 md:left-12 z-10 hidden md:flex items-center gap-3 select-none">
-            <div className="ticker-dot w-2 h-2 bg-mono rounded-full animate-ping" />
-            <span className="font-mono text-[10px] text-text-custom3 uppercase tracking-wider">
-              Available for new projects & collaborations
-            </span>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 1.3 }}
+              className="hero-avail flex items-center gap-3 select-none pt-2"
+            >
+              <div className="ticker-dot w-1.5 h-1.5 bg-mono rounded-full animate-ping" />
+              <span className="font-mono text-[10px] text-text-custom3 uppercase tracking-wider">
+                Open to Work — Available for new projects &amp; roles
+              </span>
+            </motion.div>
           </div>
 
           <div className="absolute bottom-16 right-8 md:right-12 z-10 hidden md:flex flex-col items-center gap-3 select-none">
@@ -368,13 +368,13 @@ export default function Home() {
               </h2>
               <div className="about-body text-text-custom2 text-[15px] leading-relaxed flex flex-col gap-5">
                 <p>
-                  As an Associate Software Engineer at Infinite Computer Solutions, I build production-level healthcare automation systems. My exposure to OCR extraction engines, LLM-powered classification workflows, and HIPAA-secure data pipelines has shaped how I design resilient, observable, and compliant AI architectures at scale.
+                  Hi, I&apos;m Manoj D — an AI Engineer building developer tools, workflows, and system infrastructure. I naturally think in systems rather than isolated features, focusing on reducing complexity, orchestrating workflows, and building tools that improve visibility and human decision-making.
                 </p>
                 <p>
-                  I focus on the intersection of LLM orchestration, developer cognitive tooling, and backend infrastructure. Whether building code visualization graphs like Sentieal, real-time multiplayer geo-chess platforms like En Passant, or setting up secure Docker container workflows, my goal is to design systems that reduce complexity and run with high reliability.
+                  Professionally, I work as an Associate Software Engineer designing production AI systems for healthcare. I build secure, HIPAA-compliant OCR and LLM-powered pipelines, enterprise Azure architectures, and workflow automation. From building Zen AI, I&apos;ve learned that reliability and deployment infrastructure matter just as much as the models themselves.
                 </p>
                 <p>
-                  Long-term goal: build AI systems and startup ecosystems that help builders, engineers, and founders move faster.
+                  Outside of enterprise systems, I build in public to solve real-world bottlenecks. My current focus is developing Sentinel (a developer infrastructure SaaS for codebase comprehension), YourRIGHT/Urimai (a civic transparent escalation platform), and En Passant (a territory-based geolocation chess game).
                 </p>
               </div>
               <div className="stack-row flex flex-wrap gap-2 mt-4">
@@ -486,9 +486,9 @@ export default function Home() {
                   company: "Independent",
                   desc: "Building AI systems, developer tools, and startup ideas. Documenting the process, sharing systems thinking, and exploring how AI will reshape software engineering over the next decade.",
                   bullets: [
-                    "Sentieal — AI developer intelligence platform",
+                    "Sentinel — AI developer intelligence platform",
                     "En Passant — real-time multiplayer geolocation chess",
-                    "Your Rights — civic tech for anonymous grievance escalation",
+                    "YourRIGHT/Urimai — civic tech for anonymous grievance escalation",
                   ],
                 },
               ].map((item, idx) => (
@@ -543,7 +543,7 @@ export default function Home() {
 
             <div className="now-cards grid grid-cols-1 md:grid-cols-3 gap-[1px] bg-border-custom border border-border-custom">
               {[
-                { label: "Building", val: "Sentieal", sub: "AI code intelligence platform — making large codebases navigable for developers" },
+                { label: "Building", val: "Sentinel", sub: "AI code intelligence platform — making large codebases navigable for developers" },
                 { label: "Thinking About", val: "LLM Orchestration Patterns", sub: "How multi-agent systems fail in production and what actually makes them reliable" },
                 { label: "Exploring", val: "Startup Ecosystems", sub: "Builder communities, founder networks, how to create environments where makers move fast" },
               ].map((card, idx) => (
@@ -619,7 +619,7 @@ export default function Home() {
               {/* Verified links from links.txt */}
               <div className="contact-links flex flex-col w-full">
                 {[
-                  { name: "GitHub", url: "https://github.com/ManojD37" },
+                  { name: "GitHub", url: "https://github.com/ManojDevarajulu" },
                   { name: "LinkedIn", url: "https://www.linkedin.com/in/manojd7/" },
                   { name: "Twitter / X", url: "https://x.com/ManojDevarajulu" },
                 ].map((item, idx) => (
@@ -639,13 +639,13 @@ export default function Home() {
             </div>
 
             <div className="flex flex-col gap-6 max-w-sm lg:self-start lg:mt-8">
-              <a href="mailto:manoj@example.com" className="big-email text-2xl font-light text-text-custom hover:text-text-custom2 tracking-tight pb-6 border-b border-border-custom transition-colors duration-200">
-                manoj@example.com
+              <a href="mailto:builds@manojdevarajulu.cc" className="big-email text-2xl font-light text-text-custom hover:text-text-custom2 tracking-tight pb-6 border-b border-border-custom transition-colors duration-200">
+                builds@manojdevarajulu.cc
               </a>
               <div className="availability flex items-center gap-2 select-none">
                 <div className="avail-dot w-2 h-2 bg-mono rounded-full animate-ping" />
                 <span className="font-mono text-[10px] text-mono uppercase tracking-wider">
-                  Available for new projects
+                  Open to Work — Available
                 </span>
               </div>
               <p className="contact-note text-text-custom3 font-mono text-[11px] leading-relaxed mt-2 select-none">

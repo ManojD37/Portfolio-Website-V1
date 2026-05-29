@@ -22,25 +22,29 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Manoj D — AI Engineer & Systems Builder",
-  description: "Building AI infrastructure, developer tools, and intelligent workflows. Chennai, India.",
+  title: "Manoj D — AI Engineer & Full-Stack Developer",
+  description: "AI Engineer & Full-Stack Developer. Open to Work / Available for full-time opportunities. Chennai, India.",
+  manifest: "/site.webmanifest",
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/icon.svg", type: "image/svg+xml" }
+      { url: "/android-chrome-512x512.png", sizes: "32x32", type: "image/png" },
+      { url: "/android-chrome-512x512.png", sizes: "16x16", type: "image/png" },
+      { url: "/android-chrome-512x512.png", sizes: "192x192", type: "image/png" },
+      { url: "/android-chrome-512x512.png", sizes: "512x512", type: "image/png" }
     ],
+    shortcut: "/android-chrome-512x512.png",
     apple: "/android-chrome-512x512.png"
   },
   openGraph: {
-    title: "Manoj D — AI Engineer & Systems Builder",
-    description: "Building AI infrastructure, developer tools, and intelligent workflows. Chennai, India.",
+    title: "Manoj D — AI Engineer & Full-Stack Developer (Open to Work)",
+    description: "AI Engineer & Full-Stack Developer. Open to Work / Available for full-time opportunities. Chennai, India.",
     type: "website",
     url: "https://manojd.dev",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Manoj D — AI Engineer",
-    description: "Systems-first AI engineer. Building things that matter.",
+    title: "Manoj D — AI Engineer (Open to Work)",
+    description: "Systems-first AI engineer & full-stack developer. Open to Work / Available for full-time roles.",
   },
 };
 
@@ -52,9 +56,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${dmSans.variable} ${dmMono.variable} ${playfairDisplay.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans">
+      <body suppressHydrationWarning className="min-h-full flex flex-col font-sans">
         {children}
       </body>
     </html>

@@ -46,6 +46,7 @@ export function ProjectCanvas({ canvasId }: { canvasId: string }) {
     resize();
 
     const drawP1 = (c: CanvasRenderingContext2D, w: number, h: number, f: number) => {
+      if (w <= 0 || h <= 0) return;
       c.clearRect(0, 0, w, h);
       c.fillStyle = "#0e1210";
       c.fillRect(0, 0, w, h);
@@ -86,6 +87,7 @@ export function ProjectCanvas({ canvasId }: { canvasId: string }) {
     };
 
     const drawP2 = (c: CanvasRenderingContext2D, w: number, h: number, f: number) => {
+      if (w <= 0 || h <= 0) return;
       c.clearRect(0, 0, w, h);
       c.fillStyle = "#0e100e";
       c.fillRect(0, 0, w, h);
@@ -124,6 +126,7 @@ export function ProjectCanvas({ canvasId }: { canvasId: string }) {
     };
 
     const drawP3 = (c: CanvasRenderingContext2D, w: number, h: number, f: number) => {
+      if (w <= 0 || h <= 0) return;
       c.clearRect(0, 0, w, h);
       c.fillStyle = "#0e0e10";
       c.fillRect(0, 0, w, h);
@@ -157,6 +160,7 @@ export function ProjectCanvas({ canvasId }: { canvasId: string }) {
     };
 
     const drawP4 = (c: CanvasRenderingContext2D, w: number, h: number, f: number) => {
+      if (w <= 0 || h <= 0) return;
       c.clearRect(0, 0, w, h);
       c.fillStyle = "#0e0e0e";
       c.fillRect(0, 0, w, h);
@@ -239,7 +243,10 @@ export default function ProjectCard({ project, onPreview }: ProjectCardProps) {
           </span>
         )}
 
-        <span className="proj-hero-num font-mono text-7xl md:text-8xl font-light text-transparent stroke-[1px] stroke-text-custom2/15 select-none relative z-2 line-height-none tracking-tighter">
+        <span
+          className="proj-hero-num font-mono text-7xl md:text-8xl font-light text-transparent select-none relative z-2 tracking-tighter"
+          style={{ WebkitTextStroke: "1px rgba(232, 230, 224, 0.12)", lineHeight: 1 }}
+        >
           {project.num}
         </span>
         <span className="proj-hero-type font-mono text-[10px] text-mono tracking-[0.18em] uppercase relative z-2 mb-2">
