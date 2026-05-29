@@ -185,7 +185,7 @@ export default function Home() {
 
       {/* ── Header / Navigation ── */}
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 px-8 py-5 md:px-12 md:py-6 flex justify-between items-center border-b transition-all duration-500 ${scrolled
+        className={`fixed top-0 left-0 right-0 z-50 px-6 md:px-12 py-5 md:py-6 flex justify-between items-center border-b transition-all duration-500 ${scrolled
             ? "border-border-custom bg-bg/85 backdrop-blur-xl shadow-lg"
             : "border-transparent bg-transparent"
           }`}
@@ -241,7 +241,7 @@ export default function Home() {
         ══════════════════════════════════════════ */}
         <section
           id="home"
-          className="hero min-h-screen flex flex-col justify-center px-8 md:px-12 pb-20 relative overflow-hidden pt-36 md:pt-40"
+          className="hero min-h-screen flex flex-col justify-center px-6 md:px-12 pb-20 relative overflow-hidden pt-36 md:pt-40"
         >
           <HeroCanvas />
           <div className="hero-gradient absolute inset-0 z-1 pointer-events-none bg-[radial-gradient(ellipse_70%_60%_at_88%_4%,rgba(52,52,52,0.4)_0%,transparent_60%),radial-gradient(ellipse_55%_50%_at_4%_96%,rgba(107,143,113,0.09)_0%,transparent_55%),radial-gradient(ellipse_40%_40%_at_50%_50%,rgba(10,10,10,0.55)_0%,transparent_100%)]" />
@@ -252,7 +252,7 @@ export default function Home() {
           <div
             className="hero-bg-text absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 font-medium text-transparent whitespace-nowrap pointer-events-none select-none tracking-tight z-1"
             style={{
-              fontSize: "clamp(130px, 20vw, 245px)",
+              fontSize: "clamp(80px, 16vw, 240px)",
               WebkitTextStroke: "1px rgba(232, 230, 224, 0.16)",
               color: "rgba(232, 230, 224, 0.02)",
               textShadow: "0 0 80px rgba(107,143,113,0.12), 0 0 160px rgba(107,143,113,0.06)",
@@ -313,14 +313,14 @@ export default function Home() {
           </div>
 
           {/* Availability and Scroll Tickers */}
-          <div className="absolute bottom-16 left-8 md:left-12 z-10 flex items-center gap-3 select-none">
+          <div className="absolute bottom-16 left-8 md:left-12 z-10 hidden md:flex items-center gap-3 select-none">
             <div className="ticker-dot w-2 h-2 bg-mono rounded-full animate-ping" />
             <span className="font-mono text-[10px] text-text-custom3 uppercase tracking-wider">
               Available for new projects & collaborations
             </span>
           </div>
 
-          <div className="absolute bottom-16 right-8 md:right-12 z-10 flex flex-col items-center gap-3 select-none">
+          <div className="absolute bottom-16 right-8 md:right-12 z-10 hidden md:flex flex-col items-center gap-3 select-none">
             <div className="scroll-line w-[1px] h-[55px] bg-gradient-to-b from-transparent to-border-custom2 relative overflow-hidden animate-scroll-drop" />
             <span className="font-mono text-[9px] text-text-custom3 uppercase tracking-[0.25em] rotate-90 origin-bottom whitespace-nowrap mt-8">
               Scroll
