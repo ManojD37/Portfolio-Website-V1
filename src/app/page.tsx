@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, useScroll, useSpring } from "framer-motion";
 import { ArrowDown, ArrowUpRight, CheckCircle2, ChevronRight, Menu, X } from "lucide-react";
 import LenisProvider from "@/components/LenisProvider";
@@ -67,9 +67,11 @@ export default function Home() {
   const [previewUrl, setPreviewUrl] = useState("");
   const [previewTitle, setPreviewTitle] = useState("");
 
-  // Custom Cursor states
-  const [mousePos, setMousePos] = useState({ x: -100, y: -100 });
-  const [ringPos, setRingPos] = useState({ x: -100, y: -100 });
+  // Custom Cursor refs to bypass React state re-renders (runs at 120fps GPU-accelerated)
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const cursorRingRef = useRef<HTMLDivElement>(null);
+  const mousePosRef = useRef({ x: -100, y: -100 });
+  const ringPosRef = useRef({ x: -100, y: -100 });
   const [isHovered, setIsHovered] = useState(false);
 
   // Page Scroll Progress
@@ -92,35 +94,39 @@ export default function Home() {
     };
   }, []);
 
-  // Handle custom cursor tracking
+  // Handle custom cursor tracking (direct DOM update, no React re-render)
   useEffect(() => {
     if (!mounted) return;
     const updateMousePos = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
+      mousePosRef.current = { x: e.clientX, y: e.clientY };
+      if (cursorRef.current) {
+        cursorRef.current.style.transform = `translate3d(${e.clientX}px, ${e.clientY}px, 0) translate(-50%, -50%)`;
+      }
     };
 
     window.addEventListener("mousemove", updateMousePos);
     return () => window.removeEventListener("mousemove", updateMousePos);
   }, [mounted]);
 
-  // Interpolate cursor ring with inertia
+  // Interpolate cursor ring with snappy inertia (direct DOM update, no React re-render)
   useEffect(() => {
     if (!mounted) return;
     let active = true;
     const anim = () => {
       if (!active) return;
-      setRingPos((prev) => {
-        const rx = prev.x + (mousePos.x - prev.x) * 0.12;
-        const ry = prev.y + (mousePos.y - prev.y) * 0.12;
-        return { x: rx, y: ry };
-      });
+      const rx = ringPosRef.current.x + (mousePosRef.current.x - ringPosRef.current.x) * 0.18;
+      const ry = ringPosRef.current.y + (mousePosRef.current.y - ringPosRef.current.y) * 0.18;
+      ringPosRef.current = { x: rx, y: ry };
+      if (cursorRingRef.current) {
+        cursorRingRef.current.style.transform = `translate3d(${rx}px, ${ry}px, 0) translate(-50%, -50%)`;
+      }
       requestAnimationFrame(anim);
     };
     requestAnimationFrame(anim);
     return () => {
       active = false;
     };
-  }, [mousePos, mounted]);
+  }, [mounted]);
 
   // Hook cursor hover classes
   useEffect(() => {
@@ -171,15 +177,17 @@ export default function Home() {
       {/* ── Custom Cursor (Desktop only) ── */}
       <div className="hidden lg:block">
         <div
-          className="cursor fixed w-2.5 h-2.5 bg-text-custom rounded-full pointer-events-none z-[9999] -translate-x-1/2 -translate-y-1/2 transition-transform duration-100 ease-out"
-          style={{ left: `${mousePos.x}px`, top: `${mousePos.y}px` }}
+          ref={cursorRef}
+          className="cursor fixed w-2.5 h-2.5 bg-text-custom rounded-full pointer-events-none z-[9999]"
+          style={{ left: 0, top: 0, transform: "translate3d(-100px, -100px, 0) translate(-50%, -50%)" }}
         />
         <div
-          className={`cursor-ring fixed rounded-full pointer-events-none z-[9998] -translate-x-1/2 -translate-y-1/2 transition-all duration-300 ease-out border ${isHovered
+          ref={cursorRingRef}
+          className={`cursor-ring fixed rounded-full pointer-events-none z-[9998] transition-all duration-300 ease-out border ${isHovered
               ? "w-14 h-14 border-mono/65 bg-mono/5 scale-110"
               : "w-8 h-8 border-text-custom/25 bg-transparent"
             }`}
-          style={{ left: `${ringPos.x}px`, top: `${ringPos.y}px` }}
+          style={{ left: 0, top: 0, transform: "translate3d(-100px, -100px, 0) translate(-50%, -50%)" }}
         />
       </div>
 
